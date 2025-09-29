@@ -17,9 +17,9 @@ class Jogo:
         self.rodando = True
         self.tutorial = False
 
-        self.imagem_menu = pygame.image.load("assets/vermeiopng.png")
-        self.imagem_jogo = pygame.image.load("assets/imagem2.png")
-        self.imagem_inicio = pygame.image.load("assets/naveteste.png")
+        self.imagem_menu = pygame.image.load("assets/imagens/vermeiopng.png")
+        self.imagem_jogo = pygame.image.load("assets/imagens/imagem2.png")
+        self.imagem_inicio = pygame.image.load("assets/imagens/naveteste.png")
 
         self.clock = pygame.time.Clock()
 
@@ -74,7 +74,7 @@ class Jogo:
         self.tela.blit(texto, (50, 250))
 
     def roda_cutscene(self):
-        cap = cv2.VideoCapture("assets/video_1920x19080.mp4")
+        cap = cv2.VideoCapture("assets/vídeos/video_1920x19080.mp4")
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
