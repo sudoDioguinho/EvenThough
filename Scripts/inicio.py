@@ -1,6 +1,9 @@
 import pygame
 import sys
 import cv2
+import json
+from tutorial import executar_tutorial
+
 
 class Jogo:
     def __init__(self):
@@ -17,11 +20,18 @@ class Jogo:
         self.rodando = True
         self.tutorial = False
 
-        self.imagem_menu = pygame.image.load("assets/imagens/vermeiopng.png")
-        self.imagem_jogo = pygame.image.load("assets/imagens/imagem2.png")
+        self.imagem_menu = pygame.image.load("assets/imagens/telaMenu.png")
+        self.imagem_jogo = pygame.image.load("assets/imagens/relatorioProvisorio.png")
         self.imagem_inicio = pygame.image.load("assets/imagens/naveteste.png")
 
+        self.tutorial = "antes"
+
         self.clock = pygame.time.Clock()
+
+        self.texto_completo = "Atualmente Cadete C-137 encontra-se na via láctea"
+        self.texto_mostrado = ""
+        self.tempo_entre_caracteres = 100  
+        self.ultimo_tempo = pygame.time.get_ticks()
 
     def executar(self):
         while self.rodando:
@@ -50,6 +60,9 @@ class Jogo:
                         self.estado = "menu"
                     elif evento.key == pygame.K_RETURN:
                         self.estado = "cutscene"
+                
+                elif self.tutorial == "durante":
+                    executar_tutorial()
 
     def atualizar_tela(self):
         if self.estado == "menu":
@@ -65,16 +78,24 @@ class Jogo:
 
     def tela_menu(self):
         self.tela.blit(self.imagem_menu, (0, 0))
-        texto = self.fonte.render("MENU - Pressione ENTER", True, self.PRETO)
-        self.tela.blit(texto, (100, 250))
+        textoJogar = self.fonte.render("Jogar - Enter", True, self.BRANCO)
+        self.tela.blit(textoJogar, (800, 350))
+        textoSair = self.fonte.render("Sair - Esc", True, self.BRANCO)
+        self.tela.blit(textoSair, (820, 600))
 
     def tela_jogo(self):
         self.tela.blit(self.imagem_jogo, (0, 0))
-        texto = self.fonte.render("TELA DE JOGO - ENTER para jogar, ESC para sair", True, self.BRANCO)
+
+        tempo_atual = pygame.time.get_ticks()
+        if tempo_atual - self.ultimo_tempo > self.tempo_entre_caracteres and len(self.texto_mostrado) < len(self.texto_completo):
+            self.texto_mostrado += self.texto_completo[len(self.texto_mostrado)] 
+            self.ultimo_tempo = tempo_atual 
+        texto = self.fonte.render(self.texto_mostrado, True, self.BRANCO)
         self.tela.blit(texto, (50, 250))
 
     def roda_cutscene(self):
         cap = cv2.VideoCapture("assets/vídeos/video_1920x19080.mp4")
+        print("passou pelo video")
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -91,8 +112,8 @@ class Jogo:
         self.estado = "iniciar"
 
     def inicio1(self):
-        self.tutorial = True
         self.tela.blit(self.imagem_inicio, (0, 0))
+        self.tutorial = "durante"
 
 
 if __name__ == "__main__":
