@@ -94,7 +94,7 @@ class Jogo:
         self.tela.blit(texto, (50, 250))
 
     def roda_cutscene(self):
-        cap = cv2.VideoCapture("assets/vídeos/video_1920x19080.mp4")
+        cap = cv2.VideoCapture("assets/vídeos/cutscene.mp4")
         print("passou pelo video")
         while cap.isOpened():
             ret, frame = cap.read()
