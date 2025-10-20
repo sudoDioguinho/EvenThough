@@ -3,7 +3,6 @@ import sys
 import cv2
 from tutorial import executar_tutorial
 
-
 class Jogo:
     def __init__(self):
         pygame.init()
@@ -43,13 +42,13 @@ class Jogo:
         # --- Câmera ---
         self.camera_x = 0
         self.camera_y = 0
-        self.velocidade_camera = 7
+        self.velocidade_camera = 2
         self.largura_imagem = self.imagem_limite_teste.get_width()
         self.altura_imagem = self.imagem_limite_teste.get_height()
 
         # --- PERSONAGEM (animação no meio da tela) ---
         self.frames_personagem = [
-            pygame.image.load("assets/animacoes/frame1.jpg").convert_alpha(),
+            pygame.image.load("assets/animacoes/frame1.png").convert_alpha(),
             pygame.image.load("assets/animacoes/frame2.jpg").convert_alpha(),
             pygame.image.load("assets/animacoes/frame3.jpg").convert_alpha()
         ]
@@ -115,9 +114,11 @@ class Jogo:
             self.tela_jogo()
         elif self.estado == "cutscene":
             self.roda_cutscene()
+        
+        # AQUI COMEÇA A JOGABILIDADE
         elif self.estado == "iniciar":
             self.musica_menu.stop()
-            self.inicio1()
+            executar_tutorial(self)
     
 
     def tela_menu(self):
@@ -174,25 +175,6 @@ class Jogo:
 
         cap.release()
         self.estado = "iniciar"
-
-    def inicio1(self):
-        # --- Fundo (com câmera) ---
-        self.tela.fill((0, 0, 0))
-        area_visivel = pygame.Rect(self.camera_x, self.camera_y, self.largura, self.altura)
-        self.tela.blit(self.imagem_limite_teste, (0, 0), area_visivel)
-
-        # --- Atualiza a animação do personagem ---
-        tempo_atual = pygame.time.get_ticks()
-        if tempo_atual - self.ultimo_frame_troca > self.tempo_animacao:
-            self.frame_atual = (self.frame_atual + 1) % len(self.frames_personagem)
-            self.ultimo_frame_troca = tempo_atual
-
-        # --- Desenha o personagem fixo no meio da tela ---
-        frame = self.frames_personagem[self.frame_atual]
-        rect = frame.get_rect(center=self.pos_personagem)
-        self.tela.blit(frame, rect)
-
-        self.tutorial = "durante"
 
 
 if __name__ == "__main__":
