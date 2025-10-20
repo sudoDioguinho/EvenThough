@@ -1,16 +1,19 @@
 import pygame
 import sys
 import cv2
-import json
 from tutorial import executar_tutorial
 
 
 class Jogo:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         self.largura, self.altura = 1920, 1080
         self.tela = pygame.display.set_mode((self.largura, self.altura))
         pygame.display.set_caption("Inicio")
+
+        self.musica_menu = pygame.mixer.Sound("assets/audios/musica_menu.mp3")
+        self.musica_menu.play()
 
         self.BRANCO = (255, 255, 255)
         self.PRETO = (0, 0, 0)
@@ -19,6 +22,7 @@ class Jogo:
         self.estado = "menu"
         self.rodando = True
         self.tutorial = False
+        
 
         # --- Imagens principais ---
         self.imagem_menu = pygame.image.load("assets/imagens/telaMenu.png")
@@ -39,7 +43,7 @@ class Jogo:
         # --- Câmera ---
         self.camera_x = 0
         self.camera_y = 0
-        self.velocidade_camera = 20
+        self.velocidade_camera = 7
         self.largura_imagem = self.imagem_limite_teste.get_width()
         self.altura_imagem = self.imagem_limite_teste.get_height()
 
@@ -60,6 +64,7 @@ class Jogo:
             self.atualizar_tela()
             pygame.display.flip()
             self.clock.tick(60)
+            
 
         pygame.quit()
         sys.exit()
@@ -111,7 +116,9 @@ class Jogo:
         elif self.estado == "cutscene":
             self.roda_cutscene()
         elif self.estado == "iniciar":
+            self.musica_menu.stop()
             self.inicio1()
+    
 
     def tela_menu(self):
         self.tela.blit(self.imagem_menu, (0, 0))
