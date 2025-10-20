@@ -8,20 +8,15 @@ def executar_tutorial(jogo):
     area_visivel = pygame.Rect(jogo.camera_x, jogo.camera_y, jogo.largura, jogo.altura)
     jogo.tela.blit(jogo.imagem_limite_teste, (0, 0), area_visivel)
 
-    # Atualiza a animação do personagem
     tempo_atual = pygame.time.get_ticks()
     if tempo_atual - jogo.ultimo_frame_troca > jogo.tempo_animacao:
         jogo.frame_atual = (jogo.frame_atual + 1) % len(jogo.frames_personagem)
         jogo.ultimo_frame_troca = tempo_atual
-
-    # --- Efeito "boiar" usando seno ---
-    # Parâmetros do movimento:
-    amplitude = 8  # quantos pixels o personagem sobe e desce (você pode ajustar para ficar mais sutil)
-    frequencia = 0.0009  # quão rápido ele sobe e desce (ajuste para ficar mais lento ou rápido)
+    amplitude = 8  
+    frequencia = 0.0017  
     
     deslocamento_y = amplitude * math.sin(tempo_atual * frequencia)
     
-    # Calcula a posição do personagem com o deslocamento vertical
     pos_x, pos_y = jogo.pos_personagem
     pos_y_animado = pos_y + deslocamento_y
 

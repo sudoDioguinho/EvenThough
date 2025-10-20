@@ -2,6 +2,7 @@ import pygame
 import sys
 import cv2
 from tutorial import executar_tutorial
+from transicoes import fade_in
 
 class Jogo:
     def __init__(self):
@@ -20,16 +21,12 @@ class Jogo:
 
         self.estado = "menu"
         self.rodando = True
-        self.tutorial = False
-        
 
         # --- Imagens principais ---
         self.imagem_menu = pygame.image.load("assets/imagens/telaMenu.png")
         self.imagem_jogo = pygame.image.load("assets/imagens/relatorioProvisorio.png")
         self.imagem_inicio = pygame.image.load("assets/imagens/imagem3.png")
         self.imagem_limite_teste = pygame.image.load("assets/imagens/mapa5.png")
-
-        self.tutorial = "antes"
 
         self.clock = pygame.time.Clock()
 
@@ -46,7 +43,7 @@ class Jogo:
         self.largura_imagem = self.imagem_limite_teste.get_width()
         self.altura_imagem = self.imagem_limite_teste.get_height()
 
-        # --- PERSONAGEM (animação no meio da tela) ---
+        # --- PERSONAGEM ---
         self.frames_personagem = [
             pygame.image.load("assets/animacoes/frame1.png").convert_alpha(),
             pygame.image.load("assets/animacoes/frame2.jpg").convert_alpha(),
@@ -55,7 +52,7 @@ class Jogo:
         self.frame_atual = 0
         self.tempo_animacao = 800  
         self.ultimo_frame_troca = pygame.time.get_ticks()
-        self.pos_personagem = (self.largura // 2, self.altura // 2)  
+        self.pos_personagem = (self.largura // 2, self.altura // 2)
 
     def executar(self):
         while self.rodando:
@@ -63,8 +60,6 @@ class Jogo:
             self.atualizar_tela()
             pygame.display.flip()
             self.clock.tick(60)
-            
-
         pygame.quit()
         sys.exit()
 
@@ -90,7 +85,7 @@ class Jogo:
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
 
-        # --- Movimentação da câmera apenas no modo iniciar ---
+        # --- Movimentação da câmera no tutorial ---
         teclas = pygame.key.get_pressed()
         if self.estado == "iniciar":
             if teclas[pygame.K_LEFT]:
@@ -114,12 +109,8 @@ class Jogo:
             self.tela_jogo()
         elif self.estado == "cutscene":
             self.roda_cutscene()
-        
-        # AQUI COMEÇA A JOGABILIDADE
         elif self.estado == "iniciar":
-            self.musica_menu.stop()
-            executar_tutorial(self)
-    
+            executar_tutorial(self)  
 
     def tela_menu(self):
         self.tela.blit(self.imagem_menu, (0, 0))
@@ -174,6 +165,7 @@ class Jogo:
             self.clock.tick(60)
 
         cap.release()
+        fade_in(self, duracao_ms=3000)
         self.estado = "iniciar"
 
 
