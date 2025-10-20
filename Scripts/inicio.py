@@ -46,11 +46,14 @@ class Jogo:
         # --- PERSONAGEM ---
         self.frames_personagem = [
             pygame.image.load("assets/animacoes/frame1.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/frame2.jpg").convert_alpha(),
-            pygame.image.load("assets/animacoes/frame3.jpg").convert_alpha()
+            pygame.image.load("assets/animacoes/frame2.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/frame3.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/frame4.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/frame5.png").convert_alpha()
+            
         ]
         self.frame_atual = 0
-        self.tempo_animacao = 800  
+        self.tempo_animacao = 250  
         self.ultimo_frame_troca = pygame.time.get_ticks()
         self.pos_personagem = (self.largura // 2, self.altura // 2)
 
