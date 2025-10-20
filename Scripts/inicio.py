@@ -20,18 +20,39 @@ class Jogo:
         self.rodando = True
         self.tutorial = False
 
+        # --- Imagens principais ---
         self.imagem_menu = pygame.image.load("assets/imagens/telaMenu.png")
         self.imagem_jogo = pygame.image.load("assets/imagens/relatorioProvisorio.png")
         self.imagem_inicio = pygame.image.load("assets/imagens/imagem3.png")
+        self.imagem_limite_teste = pygame.image.load("assets/imagens/mapa5.png")
 
         self.tutorial = "antes"
 
         self.clock = pygame.time.Clock()
 
-        self.texto_completo = "Atualmente Cadete C-137 encontra-se na Via Láctea, em direção a um exoplaneta não identificado, estou em sua órbita coletando dados sobre, analisando a segurança do local e se há habitantes. Seguindo o planejamento da missão, tenho que coletar matéria prima em escassez no planeta Skebob. A priori esse sistema solar é muito semelhante ao nosso na questão de recursos. Ficarei rondando planeta por planeta desse sistema."
+        # --- Texto ---
+        self.texto_completo = "Atualmente Cadete C-137 encontra-se na Via Láctea, em direção a um exoplaneta não identificado..."
         self.texto_mostrado = ""
         self.tempo_entre_caracteres = 60
         self.ultimo_tempo = pygame.time.get_ticks()
+
+        # --- Câmera ---
+        self.camera_x = 0
+        self.camera_y = 0
+        self.velocidade_camera = 20
+        self.largura_imagem = self.imagem_limite_teste.get_width()
+        self.altura_imagem = self.imagem_limite_teste.get_height()
+
+        # --- PERSONAGEM (animação no meio da tela) ---
+        self.frames_personagem = [
+            pygame.image.load("assets/animacoes/frame1.jpg").convert_alpha(),
+            pygame.image.load("assets/animacoes/frame2.jpg").convert_alpha(),
+            pygame.image.load("assets/animacoes/frame3.jpg").convert_alpha()
+        ]
+        self.frame_atual = 0
+        self.tempo_animacao = 800  
+        self.ultimo_frame_troca = pygame.time.get_ticks()
+        self.pos_personagem = (self.largura // 2, self.altura // 2)  
 
     def executar(self):
         while self.rodando:
@@ -60,9 +81,25 @@ class Jogo:
                         self.estado = "menu"
                     elif evento.key == pygame.K_RETURN:
                         self.estado = "cutscene"
-                
-                elif self.tutorial == "durante":
-                    executar_tutorial()
+
+                elif self.estado == "iniciar":
+                    if evento.key == pygame.K_ESCAPE:
+                        self.estado = "menu"
+
+        # --- Movimentação da câmera apenas no modo iniciar ---
+        teclas = pygame.key.get_pressed()
+        if self.estado == "iniciar":
+            if teclas[pygame.K_LEFT]:
+                self.camera_x -= self.velocidade_camera
+            if teclas[pygame.K_RIGHT]:
+                self.camera_x += self.velocidade_camera
+            if teclas[pygame.K_UP]:
+                self.camera_y -= self.velocidade_camera
+            if teclas[pygame.K_DOWN]:
+                self.camera_y += self.velocidade_camera
+
+            self.camera_x = max(0, min(self.camera_x, self.largura_imagem - self.largura))
+            self.camera_y = max(0, min(self.camera_y, self.altura_imagem - self.altura))
 
     def atualizar_tela(self):
         if self.estado == "menu":
@@ -84,36 +121,34 @@ class Jogo:
         self.tela.blit(textoSair, (820, 600))
 
     def tela_jogo(self):
-         self.tela.blit(self.imagem_jogo, (0, 0))
+        self.tela.blit(self.imagem_jogo, (0, 0))
 
-         tempo_atual = pygame.time.get_ticks()
-         if tempo_atual - self.ultimo_tempo > self.tempo_entre_caracteres and len(self.texto_mostrado) < len(self.texto_completo):
+        tempo_atual = pygame.time.get_ticks()
+        if tempo_atual - self.ultimo_tempo > self.tempo_entre_caracteres and len(self.texto_mostrado) < len(self.texto_completo):
             self.texto_mostrado += self.texto_completo[len(self.texto_mostrado)]
             self.ultimo_tempo = tempo_atual
 
-    
-         palavras = self.texto_mostrado.split(" ")
-         linhas = []
-         linha_atual = ""
-         limite_largura = self.largura - 100  
+        palavras = self.texto_mostrado.split(" ")
+        linhas = []
+        linha_atual = ""
+        limite_largura = self.largura - 100
 
-         for palavra in palavras:
-           teste_linha = linha_atual + palavra + " "
-           largura_teste, _ = self.fonte.size(teste_linha)
-           if largura_teste < limite_largura:
-              linha_atual = teste_linha
-           else:
-              linhas.append(linha_atual)
-              linha_atual = palavra + " "
-         if linha_atual:
+        for palavra in palavras:
+            teste_linha = linha_atual + palavra + " "
+            largura_teste, _ = self.fonte.size(teste_linha)
+            if largura_teste < limite_largura:
+                linha_atual = teste_linha
+            else:
+                linhas.append(linha_atual)
+                linha_atual = palavra + " "
+        if linha_atual:
             linhas.append(linha_atual)
 
-    
-         y = 250
-         for linha in linhas:
+        y = 250
+        for linha in linhas:
             texto = self.fonte.render(linha.strip(), True, self.BRANCO)
             self.tela.blit(texto, (50, y))
-            y += self.fonte.get_height() + 10  
+            y += self.fonte.get_height() + 10
 
     def roda_cutscene(self):
         cap = cv2.VideoCapture("assets/vídeos/cutscene.mp4")
@@ -134,7 +169,22 @@ class Jogo:
         self.estado = "iniciar"
 
     def inicio1(self):
-        self.tela.blit(self.imagem_inicio, (0, 0))
+        # --- Fundo (com câmera) ---
+        self.tela.fill((0, 0, 0))
+        area_visivel = pygame.Rect(self.camera_x, self.camera_y, self.largura, self.altura)
+        self.tela.blit(self.imagem_limite_teste, (0, 0), area_visivel)
+
+        # --- Atualiza a animação do personagem ---
+        tempo_atual = pygame.time.get_ticks()
+        if tempo_atual - self.ultimo_frame_troca > self.tempo_animacao:
+            self.frame_atual = (self.frame_atual + 1) % len(self.frames_personagem)
+            self.ultimo_frame_troca = tempo_atual
+
+        # --- Desenha o personagem fixo no meio da tela ---
+        frame = self.frames_personagem[self.frame_atual]
+        rect = frame.get_rect(center=self.pos_personagem)
+        self.tela.blit(frame, rect)
+
         self.tutorial = "durante"
 
 
