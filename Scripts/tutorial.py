@@ -20,7 +20,10 @@ def executar_tutorial(jogo):
     pos_x, pos_y = jogo.pos_personagem
     pos_y_animado = pos_y + deslocamento_y
 
-    frame = jogo.frames_personagem[jogo.frame_atual]
+    if jogo.virado_esquerda:
+        frame = jogo.frames_personagem[jogo.frame_atual]
+    else:
+        frame = jogo.frames_personagem_direita[jogo.frame_atual]
     rect = frame.get_rect(center=(pos_x, pos_y_animado))
     jogo.tela.blit(frame, rect)
 

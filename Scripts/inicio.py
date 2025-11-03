@@ -1,4 +1,5 @@
 import pygame
+from pygame import *
 import sys
 import cv2
 from tutorial import executar_tutorial
@@ -39,9 +40,11 @@ class Jogo:
         # --- Câmera ---
         self.camera_x = 0
         self.camera_y = 0
-        self.velocidade_camera = 2
+        self.velocidade_camera = 50 #normal é 2
         self.largura_imagem = self.imagem_limite_teste.get_width()
         self.altura_imagem = self.imagem_limite_teste.get_height()
+
+        self.virado_esquerda = True
 
         # --- PERSONAGEM ---
         self.frames_personagem = [
@@ -52,10 +55,22 @@ class Jogo:
             pygame.image.load("assets/animacoes/frame5.png").convert_alpha()
             
         ]
+
+        self.frames_personagem_direita = [
+            pygame.image.load("assets/animacoes/virado_direita/frame1_direita.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/virado_direita/frame2_direita.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/virado_direita/frame3_direita.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/virado_direita/frame4_direita.png").convert_alpha(),
+            pygame.image.load("assets/animacoes/virado_direita/frame5_direita.png").convert_alpha()
+            
+        ]
+
         self.frame_atual = 0
         self.tempo_animacao = 250  
         self.ultimo_frame_troca = pygame.time.get_ticks()
         self.pos_personagem = (self.largura // 2, self.altura // 2)
+
+        # --- HITBOXES ---
 
     def executar(self):
         while self.rodando:
@@ -93,15 +108,20 @@ class Jogo:
         if self.estado == "iniciar":
             if teclas[pygame.K_LEFT]:
                 self.camera_x -= self.velocidade_camera
+                self.virado_esquerda = True
             if teclas[pygame.K_RIGHT]:
                 self.camera_x += self.velocidade_camera
+                self.virado_esquerda = False
             if teclas[pygame.K_UP]:
                 self.camera_y -= self.velocidade_camera
             if teclas[pygame.K_DOWN]:
                 self.camera_y += self.velocidade_camera
 
-            self.camera_x = max(0, min(self.camera_x, self.largura_imagem - self.largura))
-            self.camera_y = max(0, min(self.camera_y, self.altura_imagem - self.altura))
+            # --- BORDAS DO MAPA --- ATUALMENTE SEM LIMITE
+
+            
+            #self.camera_x = max(0, min(self.camera_x, self.largura_imagem - self.largura))
+            #self.camera_y = max(0, min(self.camera_y, self.altura_imagem - self.altura))
 
     def atualizar_tela(self):
         if self.estado == "menu":
@@ -168,7 +188,7 @@ class Jogo:
             self.clock.tick(60)
 
         cap.release()
-        fade_in(self, duracao_ms=3000)
+        fade_in(self, duracao_ms=4500)
         self.estado = "iniciar"
 
 
