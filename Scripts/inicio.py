@@ -26,17 +26,18 @@ class Jogo:
         self.rodando = True
 
         # --- Imagens principais ---
-        self.imagem_menu = pygame.image.load("assets/imagens/telaMenu.png")
+        self.imagem_menu = pygame.image.load("assets/imagens/menu03.11.2025.png")
         self.imagem_jogo = pygame.image.load("assets/imagens/relatorioProvisorio.png")
         self.imagem_inicio = pygame.image.load("assets/imagens/imagem3.png")
         self.imagem_limite_teste = pygame.image.load("assets/imagens/mapa5.png")
+        self.imagemsonar = pygame.image.load("assets/equipamentos/sonar.png")
 
         self.clock = pygame.time.Clock()
 
         # --- Texto ---
-        self.texto_completo = "Atualmente Cadete C-137 encontra-se na Via Láctea, em direção a um exoplaneta não identificado..."
+        self.texto_completo = "Atualmente Cadete C-137 encontra-se na Via Láctea, em direção a um exoplaneta não identificado, estou em sua órbita coletando dados sobre, analisando a segurança do local e se há habitantes. Seguindo o planejamento da missão, tenho que coletar matéria prima em escassez no planeta Skebob. A priori esse sistema solar é muito semelhante ao nosso na questão de recursos. Ficarei rondando planeta por planeta desse sistema."
         self.texto_mostrado = ""
-        self.tempo_entre_caracteres = 60
+        self.tempo_entre_caracteres = 30
         self.ultimo_tempo = pygame.time.get_ticks()
 
         # --- Câmera ---
@@ -73,8 +74,10 @@ class Jogo:
         self.pos_personagem = (self.largura // 2, self.altura // 2)
 
         # --- HITBOXES ---
-
         self.rect_personagem = pygame.Rect(self.pos_personagem[0], self.pos_personagem[1], 50, 80)
+
+        # --- EQUIPAMENTOS
+        self.sonarAberto = False
 
 
     def executar(self):
@@ -92,22 +95,38 @@ class Jogo:
                 self.rodando = False
 
             elif evento.type == pygame.KEYDOWN:
+                # Trata os eventos de tecla no menu
                 if self.estado == "menu":
                     if evento.key == pygame.K_RETURN:
                         self.estado = "jogo"
                     elif evento.key == pygame.K_ESCAPE:
                         self.estado = "saiu"
 
+                # Trata os eventos de tecla no jogo
                 elif self.estado == "jogo":
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
                     elif evento.key == pygame.K_RETURN:
-                        self.estado = "cutscene"
+                        self.estado = "cutscene"    
 
+                # Trata os eventos de tecla na tela "iniciar"
                 elif self.estado == "iniciar":
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
 
+                    # Alterna o estado do sonar ao pressionar a tecla 't'
+                    if evento.key == pygame.K_t:
+                        if self.sonarAberto:
+                            self.sonarAberto = False
+                            print("fechado")
+                            print(self.sonarAberto)
+ 
+                        else:
+                            self.sonarAberto = True
+                            print("aberto")
+                            print(self.sonarAberto)
+            
+        
         # --- Movimentação da câmera no tutorial ---
         teclas = pygame.key.get_pressed()
         if self.estado == "iniciar":
@@ -136,6 +155,7 @@ class Jogo:
                     self.camera_x = camera_x_ant
                     self.camera_y = camera_y_ant
                     break
+            
             # --- BORDAS DO MAPA --- ATUALMENTE SEM LIMITE
 
             #self.camera_x = max(0, min(self.camera_x, self.largura_imagem - self.largura))
@@ -151,14 +171,15 @@ class Jogo:
         elif self.estado == "cutscene":
             self.roda_cutscene()
         elif self.estado == "iniciar":
-            executar_tutorial(self)  
+            executar_tutorial(self)   
+        
 
     def tela_menu(self):
         self.tela.blit(self.imagem_menu, (0, 0))
-        textoJogar = self.fonte.render("Jogar - Enter", True, self.BRANCO)
-        self.tela.blit(textoJogar, (800, 350))
-        textoSair = self.fonte.render("Sair - Esc", True, self.BRANCO)
-        self.tela.blit(textoSair, (820, 600))
+        #textoJogar = self.fonte.render("Jogar - Enter", True, self.BRANCO)
+        #self.tela.blit(textoJogar, (800, 350))
+        #textoSair = self.fonte.render("Sair - Esc", True, self.BRANCO)
+        #self.tela.blit(textoSair, (820, 600))
 
     def tela_jogo(self):
         self.tela.blit(self.imagem_jogo, (0, 0))
@@ -206,7 +227,7 @@ class Jogo:
             self.clock.tick(60)
 
         cap.release()
-        fade_in(self, duracao_ms=4500)
+        fade_in(self, duracao_ms=3000)
         self.estado = "iniciar"
 
 

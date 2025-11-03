@@ -18,13 +18,11 @@ def executar_tutorial(jogo):
     area_visivel = pygame.Rect(jogo.camera_x, jogo.camera_y, jogo.largura, jogo.altura)
     jogo.tela.blit(jogo.imagem_limite_teste, (0, 0), area_visivel)
 
-    # --- Cria os objetos, se ainda não existirem ---
     if not hasattr(jogo, "objetos"):
         jogo.objetos = [
-            ObjetoColisao("assets/imagens/rocha.png", 500, 600),
+            ObjetoColisao("assets/imagens/rocha.png", 350, 600),
         ]
 
-    # --- Desenha os objetos (acima do mapa) ---
     for obj in jogo.objetos:
         obj.desenhar(jogo.tela, jogo.camera_x, jogo.camera_y)
 
