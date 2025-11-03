@@ -4,6 +4,8 @@ import sys
 import cv2
 from tutorial import executar_tutorial
 from transicoes import fade_in
+from objetos import ObjetoColisao
+
 
 class Jogo:
     def __init__(self):
@@ -72,6 +74,9 @@ class Jogo:
 
         # --- HITBOXES ---
 
+        self.rect_personagem = pygame.Rect(self.pos_personagem[0], self.pos_personagem[1], 50, 80)
+
+
     def executar(self):
         while self.rodando:
             self.processar_eventos()
@@ -106,6 +111,11 @@ class Jogo:
         # --- Movimentação da câmera no tutorial ---
         teclas = pygame.key.get_pressed()
         if self.estado == "iniciar":
+            # Guarda posição anterior da câmera (para restaurar se houver colisão)
+            camera_x_ant = self.camera_x
+            camera_y_ant = self.camera_y
+
+            # --- Movimenta a câmera conforme as teclas ---
             if teclas[pygame.K_LEFT]:
                 self.camera_x -= self.velocidade_camera
                 self.virado_esquerda = True
@@ -117,9 +127,17 @@ class Jogo:
             if teclas[pygame.K_DOWN]:
                 self.camera_y += self.velocidade_camera
 
+            # --- Verifica colisão com os objetos ---
+            for obj in getattr(self, "objetos", []):
+                rect_obj_camera = obj.rect.move(-self.camera_x, -self.camera_y)
+                if self.rect_personagem.colliderect(rect_obj_camera):
+                    print("Colidiu com", obj)
+                    # Reverte a posição da câmera (evita atravessar em qualquer direção)
+                    self.camera_x = camera_x_ant
+                    self.camera_y = camera_y_ant
+                    break
             # --- BORDAS DO MAPA --- ATUALMENTE SEM LIMITE
 
-            
             #self.camera_x = max(0, min(self.camera_x, self.largura_imagem - self.largura))
             #self.camera_y = max(0, min(self.camera_y, self.altura_imagem - self.altura))
 
