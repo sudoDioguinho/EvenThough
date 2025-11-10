@@ -20,7 +20,11 @@ def executar_tutorial(jogo):
 
     if not hasattr(jogo, "objetos"):
         jogo.objetos = [
-            ObjetoColisao("assets/imagens/rocha.png", 350, 600),
+            ObjetoColisao("assets/imagens/rocha.png", 600, 600),
+            ObjetoColisao("assets/mapaQuadrantes/borda2.png", 500, 0),
+            ObjetoColisao("assets/mapaQuadrantes/borda.png", 0, 500),
+            ObjetoColisao("assets/mapaQuadrantes/borda2.png", 1460, 0),
+            ObjetoColisao("assets/mapaQuadrantes/borda.png", 0, 7000),
         ]
 
     for obj in jogo.objetos:
@@ -31,8 +35,8 @@ def executar_tutorial(jogo):
     if tempo_atual - jogo.ultimo_frame_troca > jogo.tempo_animacao:
         jogo.frame_atual = (jogo.frame_atual + 1) % len(jogo.frames_personagem)
         jogo.ultimo_frame_troca = tempo_atual
-    amplitude = 8  
-    frequencia = 0.0017  
+    amplitude = 14  
+    frequencia = 0.0035  
     deslocamento_y = amplitude * math.sin(tempo_atual * frequencia)
     
     pos_x, pos_y = jogo.pos_personagem

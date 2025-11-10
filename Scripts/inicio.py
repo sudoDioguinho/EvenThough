@@ -19,7 +19,7 @@ class Jogo:
         self.musica_menu.play()
 
         self.BRANCO = (255, 255, 255)
-        self.PRETO = (0, 0, 0)
+        self.PRETO = (16, 23, 74)
         self.fonte = pygame.font.SysFont(None, 60)
 
         self.estado = "menu"
@@ -29,8 +29,9 @@ class Jogo:
         self.imagem_menu = pygame.image.load("assets/imagens/menu03.11.2025.png")
         self.imagem_jogo = pygame.image.load("assets/imagens/relatorioProvisorio.png")
         self.imagem_inicio = pygame.image.load("assets/imagens/imagem3.png")
-        self.imagem_limite_teste = pygame.image.load("assets/imagens/mapa5.png")
+        self.imagem_limite_teste = pygame.image.load("assets/mapaQuadrantes/testemapa.png")
         self.imagemsonar = pygame.image.load("assets/equipamentos/sonar.png")
+        self.caixadialogoteste = pygame.image.load("assets/elementos/caixadialogoteste.png")
 
         self.clock = pygame.time.Clock()
 
@@ -40,12 +41,13 @@ class Jogo:
         self.tempo_entre_caracteres = 30
         self.ultimo_tempo = pygame.time.get_ticks()
 
-        # --- Câmera ---
-        self.camera_x = 0
-        self.camera_y = 0
-        self.velocidade_camera = 50 #normal é 2
+        # --- Câmera --- ## antes era 0
+        self.camera_x = 1100
+        self.camera_y = 1100
+        self.velocidade_camera = 7 #rápido é 5
         self.largura_imagem = self.imagem_limite_teste.get_width()
         self.altura_imagem = self.imagem_limite_teste.get_height()
+        
 
         self.virado_esquerda = True
 
@@ -171,7 +173,15 @@ class Jogo:
         elif self.estado == "cutscene":
             self.roda_cutscene()
         elif self.estado == "iniciar":
-            executar_tutorial(self)   
+            executar_tutorial(self)  
+
+            teclas = pygame.key.get_pressed()
+            if self.sonarAberto:
+                pos_x = (self.largura - self.imagemsonar.get_width()) // 2
+                pos_y = self.altura - self.imagemsonar.get_height() - 30
+                self.tela.blit(self.imagemsonar, (pos_x, pos_y))
+       
+ 
         
 
     def tela_menu(self):
