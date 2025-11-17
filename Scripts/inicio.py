@@ -31,45 +31,57 @@ class Jogo:
         self.imagem_inicio = pygame.image.load("assets/imagens/imagem3.png")
         self.imagem_limite_teste = pygame.image.load("assets/mapaQuadrantes/testemapa.png")
         self.imagemsonar = pygame.image.load("assets/equipamentos/sonar.png")
-        self.caixadialogoteste = pygame.image.load("assets/elementos/caixadialogoteste.png")
 
+        # CAIXAS DE DIÁLOGO
+        self.posicao_dialogo = 0
+        self.caixadialogo1 = pygame.image.load("assets/elementos/caixadialogoteste.png")
+        self.exibir_caixa_dialogo1 = False
+
+        self.caixadialogo2 = pygame.image.load("assets/elementos/caixadialogo2.png")
+        self.exibir_caixa_dialogo2 = False
+
+        self.exibir_caixa_dialogo3 = False
+
+        self.tutorial_exibido = False
+        self.mostrar_texto_tutorial = True
+
+
+        # TIMERS
+        self.passou_sete_segundos = False
+        self.inicio_timer = None 
         self.clock = pygame.time.Clock()
 
         # --- Texto ---
-        self.texto_completo = "Atualmente Cadete C-137 encontra-se na Via Láctea, em direção a um exoplaneta não identificado, estou em sua órbita coletando dados sobre, analisando a segurança do local e se há habitantes. Seguindo o planejamento da missão, tenho que coletar matéria prima em escassez no planeta Skebob. A priori esse sistema solar é muito semelhante ao nosso na questão de recursos. Ficarei rondando planeta por planeta desse sistema."
+        self.texto_completo = (
+            "Atualmente Cadete C-137 encontra-se na Via Láctea, "
+            "em direção a um exoplaneta não identificado, estou em sua órbita "
+            "coletando dados sobre, analisando a segurança do local e se há habitantes. "
+            "Seguindo o planejamento da missão, tenho que coletar matéria prima em escassez "
+            "no planeta Skebob. A priori esse sistema solar é muito semelhante ao nosso na questão de recursos. "
+            "Ficarei rondando planeta por planeta desse sistema."
+        )
         self.texto_mostrado = ""
         self.tempo_entre_caracteres = 30
         self.ultimo_tempo = pygame.time.get_ticks()
 
-        # --- Câmera --- ## antes era 0
+        self.texto_pressione_t_abrir_sonar = "Pressione T para abrir o equipamento Sonar"
+        self.mostrar_texto_tutorial = True
+
+        # --- Câmera ---
         self.camera_x = 1100
         self.camera_y = 1100
-        self.velocidade_camera = 7 #rápido é 5
+        self.velocidade_camera = 7
         self.largura_imagem = self.imagem_limite_teste.get_width()
         self.altura_imagem = self.imagem_limite_teste.get_height()
-        
-
         self.virado_esquerda = True
 
         # --- PERSONAGEM ---
         self.frames_personagem = [
-            pygame.image.load("assets/animacoes/frame1.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/frame2.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/frame3.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/frame4.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/frame5.png").convert_alpha()
-            
+            pygame.image.load(f"assets/animacoes/frame{i}.png").convert_alpha() for i in range(1,6)
         ]
-
         self.frames_personagem_direita = [
-            pygame.image.load("assets/animacoes/virado_direita/frame1_direita.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/virado_direita/frame2_direita.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/virado_direita/frame3_direita.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/virado_direita/frame4_direita.png").convert_alpha(),
-            pygame.image.load("assets/animacoes/virado_direita/frame5_direita.png").convert_alpha()
-            
+            pygame.image.load(f"assets/animacoes/virado_direita/frame{i}_direita.png").convert_alpha() for i in range(1,6)
         ]
-
         self.frame_atual = 0
         self.tempo_animacao = 250  
         self.ultimo_frame_troca = pygame.time.get_ticks()
@@ -78,9 +90,27 @@ class Jogo:
         # --- HITBOXES ---
         self.rect_personagem = pygame.Rect(self.pos_personagem[0], self.pos_personagem[1], 50, 80)
 
-        # --- EQUIPAMENTOS
+        # --- EQUIPAMENTOS ---
         self.sonarAberto = False
 
+        # --- VINHETA ---
+        self.vinheta_surface = self.criar_vinheta()
+
+    def criar_vinheta(self):
+        vinheta = pygame.Surface((self.largura, self.altura), pygame.SRCALPHA)
+        centro_x, centro_y = self.largura // 2, self.altura // 2
+        max_raio = max(self.largura, self.altura) // 2
+        for y in range(self.altura):
+            for x in range(self.largura):
+                dx = x - centro_x
+                dy = y - centro_y
+                distancia = (dx**2 + dy**2)**0.5
+                alpha = min(180, int(180 * (distancia / max_raio)))
+                vinheta.set_at((x, y), (0, 0, 0, alpha))
+        return vinheta
+
+    def aplicar_vinheta(self):
+        self.tela.blit(self.vinheta_surface, (0, 0))
 
     def executar(self):
         while self.rodando:
@@ -95,48 +125,43 @@ class Jogo:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.rodando = False
-
             elif evento.type == pygame.KEYDOWN:
-                # Trata os eventos de tecla no menu
                 if self.estado == "menu":
                     if evento.key == pygame.K_RETURN:
                         self.estado = "jogo"
                     elif evento.key == pygame.K_ESCAPE:
                         self.estado = "saiu"
-
-                # Trata os eventos de tecla no jogo
                 elif self.estado == "jogo":
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
                     elif evento.key == pygame.K_RETURN:
-                        self.estado = "cutscene"    
-
-                # Trata os eventos de tecla na tela "iniciar"
+                        self.estado = "cutscene"
                 elif self.estado == "iniciar":
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
 
-                    # Alterna o estado do sonar ao pressionar a tecla 't'
+                    if evento.key == pygame.K_RETURN and self.exibir_caixa_dialogo1:
+                        self.exibir_caixa_dialogo1 = False
+                        self.posicao_dialogo = 2
+                        self.passou_sete_segundos = False  # Reset timer para próximo diálogo
+                        self.inicio_timer = pygame.time.get_ticks()
+
+                    if evento.key == pygame.K_RETURN and self.exibir_caixa_dialogo2:
+                        self.exibir_caixa_dialogo2 = False
+
                     if evento.key == pygame.K_t:
-                        if self.sonarAberto:
-                            self.sonarAberto = False
-                            print("fechado")
-                            print(self.sonarAberto)
- 
+                        self.sonarAberto = not self.sonarAberto
+                        if not self.tutorial_exibido:
+                            self.mostrar_texto_tutorial = True
+                            self.tutorial_exibido = True
                         else:
-                            self.sonarAberto = True
-                            print("aberto")
-                            print(self.sonarAberto)
-            
-        
-        # --- Movimentação da câmera no tutorial ---
+                            self.mostrar_texto_tutorial = False
+
         teclas = pygame.key.get_pressed()
         if self.estado == "iniciar":
-            # Guarda posição anterior da câmera (para restaurar se houver colisão)
             camera_x_ant = self.camera_x
             camera_y_ant = self.camera_y
 
-            # --- Movimenta a câmera conforme as teclas ---
             if teclas[pygame.K_LEFT]:
                 self.camera_x -= self.velocidade_camera
                 self.virado_esquerda = True
@@ -148,20 +173,12 @@ class Jogo:
             if teclas[pygame.K_DOWN]:
                 self.camera_y += self.velocidade_camera
 
-            # --- Verifica colisão com os objetos ---
             for obj in getattr(self, "objetos", []):
                 rect_obj_camera = obj.rect.move(-self.camera_x, -self.camera_y)
                 if self.rect_personagem.colliderect(rect_obj_camera):
-                    print("Colidiu com", obj)
-                    # Reverte a posição da câmera (evita atravessar em qualquer direção)
                     self.camera_x = camera_x_ant
                     self.camera_y = camera_y_ant
                     break
-            
-            # --- BORDAS DO MAPA --- ATUALMENTE SEM LIMITE
-
-            #self.camera_x = max(0, min(self.camera_x, self.largura_imagem - self.largura))
-            #self.camera_y = max(0, min(self.camera_y, self.altura_imagem - self.altura))
 
     def atualizar_tela(self):
         if self.estado == "menu":
@@ -173,23 +190,57 @@ class Jogo:
         elif self.estado == "cutscene":
             self.roda_cutscene()
         elif self.estado == "iniciar":
-            executar_tutorial(self)  
+            executar_tutorial(self)
 
-            teclas = pygame.key.get_pressed()
+            # --- Atualiza texto letra por letra ---
+            tempo_atual = pygame.time.get_ticks()
+            if tempo_atual - self.ultimo_tempo > self.tempo_entre_caracteres and len(self.texto_mostrado) < len(self.texto_completo):
+                self.texto_mostrado += self.texto_completo[len(self.texto_mostrado)]
+                self.ultimo_tempo = tempo_atual
+
+            # --- Caixa de diálogo 1 ---
+            if self.inicio_timer is None:
+                self.inicio_timer = pygame.time.get_ticks()
+
+            if not self.passou_sete_segundos and self.posicao_dialogo == 0:
+                if pygame.time.get_ticks() - self.inicio_timer >= 7000:
+                    self.exibir_caixa_dialogo1 = True
+                    self.passou_sete_segundos = True
+
+            if self.exibir_caixa_dialogo1:
+                pos_x = (self.largura - self.caixadialogo1.get_width()) // 2
+                pos_y = self.altura - self.caixadialogo1.get_height() - 30
+                self.tela.blit(self.caixadialogo1, (pos_x, pos_y))
+
+            # --- Caixa de diálogo 2 ---
+            if not self.passou_sete_segundos and self.posicao_dialogo == 2:
+                if pygame.time.get_ticks() - self.inicio_timer >= 7000:
+                    self.exibir_caixa_dialogo2 = True
+                    self.passou_sete_segundos = True
+
+            if self.exibir_caixa_dialogo2:
+                pos_x = (self.largura - self.caixadialogo2.get_width()) // 2
+                pos_y = self.altura - self.caixadialogo2.get_height() - 30
+                self.tela.blit(self.caixadialogo2, (pos_x, pos_y))
+
+            # --- Tutorial e sonar ---
+            if self.mostrar_texto_tutorial:
+                texto_surface = self.fonte.render(self.texto_pressione_t_abrir_sonar, True, self.BRANCO)
+                texto_rect = texto_surface.get_rect()
+                texto_rect.bottomleft = (20, self.altura - 5)
+                self.tela.blit(texto_surface, texto_rect)
+
             if self.sonarAberto:
                 pos_x = (self.largura - self.imagemsonar.get_width()) // 2
                 pos_y = self.altura - self.imagemsonar.get_height() - 30
                 self.tela.blit(self.imagemsonar, (pos_x, pos_y))
-       
- 
-        
+
+            # --- VINHETA ---
+            self.aplicar_vinheta()
+
 
     def tela_menu(self):
         self.tela.blit(self.imagem_menu, (0, 0))
-        #textoJogar = self.fonte.render("Jogar - Enter", True, self.BRANCO)
-        #self.tela.blit(textoJogar, (800, 350))
-        #textoSair = self.fonte.render("Sair - Esc", True, self.BRANCO)
-        #self.tela.blit(textoSair, (820, 600))
 
     def tela_jogo(self):
         self.tela.blit(self.imagem_jogo, (0, 0))
@@ -223,19 +274,15 @@ class Jogo:
 
     def roda_cutscene(self):
         cap = cv2.VideoCapture("assets/vídeos/cutscene.mp4")
-        print("passou pelo video")
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
-
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
-
             self.tela.blit(frame, (0, 0))
             pygame.display.update()
             self.clock.tick(60)
-
         cap.release()
         fade_in(self, duracao_ms=3000)
         self.estado = "iniciar"
