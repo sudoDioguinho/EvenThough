@@ -82,10 +82,22 @@ class Jogo:
         self.frames_personagem_direita = [
             pygame.image.load(f"assets/animacoes/virado_direita/frame{i}_direita.png").convert_alpha() for i in range(1,6)
         ]
+
+        
+
         self.frame_atual = 0
         self.tempo_animacao = 250  
         self.ultimo_frame_troca = pygame.time.get_ticks()
         self.pos_personagem = (self.largura // 2, self.altura // 2)
+
+        # --- ANIMAÇÕES CAIXA DIALOGO 1
+        self.frames_caixadialogo1 = [
+                    pygame.image.load(f"assets/animacoes/frames_caixadialogo1/caixa_dialogo{i}.png").convert_alpha() for i in range(1,8)
+                ]
+        self.frame_caixa_atual = 0
+        self.tempo_animacao_caixa = 200  # tempo entre frames em ms
+        self.ultimo_frame_caixa = pygame.time.get_ticks()
+
 
         # --- HITBOXES ---
         self.rect_personagem = pygame.Rect(self.pos_personagem[0], self.pos_personagem[1], 50, 80)
@@ -208,9 +220,16 @@ class Jogo:
                     self.passou_sete_segundos = True
 
             if self.exibir_caixa_dialogo1:
-                pos_x = (self.largura - self.caixadialogo1.get_width()) // 2
-                pos_y = self.altura - self.caixadialogo1.get_height() - 30
-                self.tela.blit(self.caixadialogo1, (pos_x, pos_y))
+                # Atualiza frame da animação
+                agora = pygame.time.get_ticks()
+                if agora - self.ultimo_frame_caixa >= self.tempo_animacao_caixa:
+                    self.frame_caixa_atual = (self.frame_caixa_atual + 1) % len(self.frames_caixadialogo1)
+                    self.ultimo_frame_caixa = agora
+
+                frame = self.frames_caixadialogo1[self.frame_caixa_atual]
+                pos_x = (self.largura - frame.get_width()) // 2
+                pos_y = self.altura - frame.get_height() - 30
+                self.tela.blit(frame, (pos_x, pos_y))
 
             # --- Caixa de diálogo 2 ---
             if not self.passou_sete_segundos and self.posicao_dialogo == 2:
