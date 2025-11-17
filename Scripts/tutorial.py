@@ -21,10 +21,14 @@ def executar_tutorial(jogo):
     if not hasattr(jogo, "objetos"):
         jogo.objetos = [
             ObjetoColisao("assets/imagens/rocha.png", 600, 600),
-            ObjetoColisao("assets/mapaQuadrantes/borda2.png", 500, 0),
-            ObjetoColisao("assets/mapaQuadrantes/borda.png", 0, 500),
-            ObjetoColisao("assets/mapaQuadrantes/borda2.png", 1460, 0),
-            ObjetoColisao("assets/mapaQuadrantes/borda.png", 0, 7000),
+            #ObjetoColisao("assets/mapaQuadrantes/borda2.png", 500, 0),
+           # ObjetoColisao("assets/mapaQuadrantes/borda.png", 0, 500),
+            #ObjetoColisao("assets/mapaQuadrantes/borda2.png", 1460, 0),
+            #ObjetoColisao("assets/mapaQuadrantes/borda.png", 0, 7000),
+            ObjetoColisao("assets/mapa_hitboxes/testechaocaverna.png", 0,650),
+            ObjetoColisao("assets/mapa_hitboxes/testechaocaverna.png", 0,2750),
+            ObjetoColisao("assets/mapa_hitboxes/testeparedeesquerdacaverna.png", -600,800),
+            ObjetoColisao("assets/mapa_hitboxes/testeparedeesquerdacaverna.png", 6000,800),
         ]
 
     for obj in jogo.objetos:
