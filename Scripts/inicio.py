@@ -15,6 +15,8 @@ class Jogo:
         self.tela = pygame.display.set_mode((self.largura, self.altura))
         pygame.display.set_caption("Inicio")
 
+        self.ost = pygame.mixer.Sound("assets/audios/ost.mp3")
+ 
         self.musica_menu = pygame.mixer.Sound("assets/audios/musica_menu.mp3")
         self.musica_menu.play()
 
@@ -98,6 +100,25 @@ class Jogo:
         self.tempo_animacao_caixa = 200  # tempo entre frames em ms
         self.ultimo_frame_caixa = pygame.time.get_ticks()
 
+        self.frames_caixadialogo2 = [
+            pygame.image.load(f"assets/animacoes/frames_caixadialogo2/2caixa_dialogo{i}.png").convert_alpha() for i in range(1,8)
+        ]
+
+        self.frames_caixadialogo3 = [
+            pygame.image.load(f"assets/animacoes/frames_caixadialogo3/3caixa_dialogo{i}.png").convert_alpha() for i in range(1,8)
+        ]
+
+                # --- ANIMAÇÕES CAIXA 2
+        self.frame_caixa2_atual = 0
+        self.tempo_animacao_caixa2 = 200
+        self.ultimo_frame_caixa2 = pygame.time.get_ticks()
+
+        # --- ANIMAÇÕES CAIXA 3
+        self.frame_caixa3_atual = 0
+        self.tempo_animacao_caixa3 = 200
+        self.ultimo_frame_caixa3 = pygame.time.get_ticks()
+
+
 
         # --- HITBOXES ---
         self.rect_personagem = pygame.Rect(self.pos_personagem[0], self.pos_personagem[1], 50, 80)
@@ -153,6 +174,7 @@ class Jogo:
                         self.estado = "menu"
 
                     if evento.key == pygame.K_RETURN and self.exibir_caixa_dialogo1:
+                        
                         self.exibir_caixa_dialogo1 = False
                         self.posicao_dialogo = 2
                         self.passou_sete_segundos = False  # Reset timer para próximo diálogo
@@ -160,6 +182,19 @@ class Jogo:
 
                     if evento.key == pygame.K_RETURN and self.exibir_caixa_dialogo2:
                         self.exibir_caixa_dialogo2 = False
+                        self.exibir_caixa_dialogo3 = True
+
+                        self.posicao_dialogo = 3  # <-- FALTAVA ISSO
+                        self.passou_sete_segundos = False  # <-- REINICIA TIMER
+                        self.inicio_timer = pygame.time.get_ticks()  # <-- TIMER ZERADO
+
+                        self.frame_caixa3_atual = 0
+                        self.ultimo_frame_caixa3 = pygame.time.get_ticks()
+
+
+                    if evento.key == pygame.K_RETURN and self.exibir_caixa_dialogo3:
+                        self.exibir_caixa_dialogo3 = False
+
 
                     if evento.key == pygame.K_t:
                         self.sonarAberto = not self.sonarAberto
@@ -203,6 +238,8 @@ class Jogo:
             self.roda_cutscene()
         elif self.estado == "iniciar":
             executar_tutorial(self)
+            self.musica_menu.stop()
+            self.ost.play(loops=-1)
 
             # --- Atualiza texto letra por letra ---
             tempo_atual = pygame.time.get_ticks()
@@ -231,16 +268,43 @@ class Jogo:
                 pos_y = self.altura - frame.get_height() - 30
                 self.tela.blit(frame, (pos_x, pos_y))
 
-            # --- Caixa de diálogo 2 ---
+                    # --- Caixa de diálogo 2 ---
             if not self.passou_sete_segundos and self.posicao_dialogo == 2:
                 if pygame.time.get_ticks() - self.inicio_timer >= 7000:
                     self.exibir_caixa_dialogo2 = True
                     self.passou_sete_segundos = True
 
             if self.exibir_caixa_dialogo2:
-                pos_x = (self.largura - self.caixadialogo2.get_width()) // 2
-                pos_y = self.altura - self.caixadialogo2.get_height() - 30
-                self.tela.blit(self.caixadialogo2, (pos_x, pos_y))
+                agora = pygame.time.get_ticks()
+                if agora - self.ultimo_frame_caixa2 >= self.tempo_animacao_caixa2:
+                    self.frame_caixa2_atual = (self.frame_caixa2_atual + 1) % len(self.frames_caixadialogo2)
+                    self.ultimo_frame_caixa2 = agora
+
+                frame2 = self.frames_caixadialogo2[self.frame_caixa2_atual]
+                pos_x = (self.largura - frame2.get_width()) // 2
+                pos_y = self.altura - frame2.get_height() - 30
+                self.tela.blit(frame2, (pos_x, pos_y))
+            
+            # --- Caixa de diálogo 3 ---
+            if self.exibir_caixa_dialogo3:
+                agora = pygame.time.get_ticks()
+                if agora - self.ultimo_frame_caixa3 >= self.tempo_animacao_caixa3:
+                    self.frame_caixa3_atual = (self.frame_caixa3_atual + 1) % len(self.frames_caixadialogo3)
+                    self.ultimo_frame_caixa3 = agora
+
+                frame3 = self.frames_caixadialogo3[self.frame_caixa3_atual]
+                pos_x = (self.largura - frame3.get_width()) // 2
+                pos_y = self.altura - frame3.get_height() - 30
+                self.tela.blit(frame3, (pos_x, pos_y))
+            
+            # --- Caixa de diálogo 3 ---
+            if not self.passou_sete_segundos and self.posicao_dialogo == 3:
+                if pygame.time.get_ticks() - self.inicio_timer >= 7000:
+                    self.exibir_caixa_dialogo3 = True
+                    self.passou_sete_segundos = True
+
+
+
 
             # --- Tutorial e sonar ---
             if self.mostrar_texto_tutorial:
